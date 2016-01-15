@@ -11,7 +11,8 @@ def _splitnames(names):
         return []
 
 def get_hosts_supporting_aws(self, arg_hosts, arg_roles, arg_exclude_hosts, env=None):
-    hosts = tasks.Task.get_hosts(self, arg_hosts, arg_roles, arg_exclude_hosts, env)
+    hosts, roles = tasks.Task.get_hosts_and_effective_roles(self, arg_hosts, arg_roles,
+                                                            arg_exclude_hosts, env)
 
     ids = _splitnames(env.ec2ids)
     for instanceid in ids:
@@ -34,11 +35,11 @@ def get_hosts_supporting_aws(self, arg_hosts, arg_roles, arg_exclude_hosts, env=
             instance.add_instance_to_env()
             hosts.append(instance.get_ssh_uri())
 
-    return hosts
+    return (hosts, roles)
 
 
 def monkey_patch_get_hosts():
-    tasks.WrappedCallableTask.get_hosts = get_hosts_supporting_aws
+    tasks.WrappedCallableTask.get_hosts_and_effective_roles = get_hosts_supporting_aws
 
 def awsfab():
     monkey_patch_get_hosts()
